@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import segno
 
 # 1. 初始化全域變數
 if "responses" not in st.session_state:
@@ -11,8 +12,7 @@ if "current_question" not in st.session_state:
         "correct_answer": "B"
     }
 
-# 2. 自動判別：如果網址最後面有 ?role=student 就直接進入學生端，否則提供選單
-# 這樣學生掃描 QR Code 後就不會不小心切換到老師端
+# 2. 自動判別角色
 query_params = st.query_params
 if query_params.get("role") == "student":
     default_role = "學生端 (手機畫面)"
@@ -32,14 +32,14 @@ if role == "老師端 (大螢幕/PPT)":
         
     st.write(f"💡 正確答案是：**{q['correct_answer']}**")
 
-    # 您的專屬正式網址，並加上參數強制手機進入學生端
+    # 專屬正式網址
     student_url = "https://streamlit.app" 
     
-    # 使用超穩定的線上 API 產生 QR Code 圖片
-    qr_api_url = f"https://qrserver.com{student_url}"
+    # 使用 segno 產生最穩定的 SVG 格式 QR Code
+    qr = segno.make(student_url)
     
     # 顯示 QR Code 供學生掃描
-    st.image(qr_api_url, caption="請學生掃描 QR Code 進入加入答題", width=250)
+    st.image(qr.png_data_uri(scale=5), caption="請學生掃描 QR Code 進入加入答題", width=250)
 
     st.divider()
     st.subheader("📊 即時答題統計")
