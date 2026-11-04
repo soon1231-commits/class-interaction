@@ -1,3 +1,2 @@
-qrcode
-Pillow
+segno
 pandas
