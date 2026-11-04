@@ -37,7 +37,7 @@ if role == "老師端 (大螢幕/PPT)":
     img = qr.make_image(fill_color="black", back_color="white")
     
     # 顯示 QR Code 供學生掃描
-    st.image(img.to_image(), caption="請學生掃描 QR Code 進入加入答題", width=250)
+    st.image(img, caption="請學生掃描 QR Code 進入加入答題", width=250)
 
     st.divider()
     st.subheader("📊 即時答題統計")
