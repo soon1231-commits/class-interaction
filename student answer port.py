@@ -33,7 +33,7 @@ if role == "老師端 (大螢幕/PPT)":
     st.write(f"💡 正確答案是：**{q['correct_answer']}**")
 
     # 專屬正式網址
-    student_url = "https://streamlit.app" 
+    student_url = "class-interaction-qqspmptpuvrydk4oblxfvw.streamlit.app/?role=student"
     
     # 使用 segno 產生最穩定的 SVG 格式 QR Code
     qr = segno.make(student_url)
