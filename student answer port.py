@@ -1,12 +1,9 @@
 import streamlit as st
-import qrcode
-from PIL import Image
 import pandas as pd
-import io
 
-# 1. 初始化全域變數（在 Streamlit 中用 session_state 模擬簡單的資料庫）
+# 1. 初始化全域變數
 if "responses" not in st.session_state:
-    st.session_state.responses = []  # 儲存學生的作答紀錄：[{"name": "張三", "answer": "A", "correct": True}]
+    st.session_state.responses = []  
 if "current_question" not in st.session_state:
     st.session_state.current_question = {
         "text": "Python 內建用來輸出文字的函式是什麼？",
@@ -14,10 +11,17 @@ if "current_question" not in st.session_state:
         "correct_answer": "B"
     }
 
-# 讓使用者選擇身分（在實務上，老師與學生會分開不同的網址，這裡用選單示意）
-role = st.sidebar.selectbox("請選擇您的角色", ["學生端 (手機畫面)", "老師端 (大螢幕/PPT)"])
+# 2. 自動判別：如果網址最後面有 ?role=student 就直接進入學生端，否則提供選單
+# 這樣學生掃描 QR Code 後就不會不小心切換到老師端
+query_params = st.query_params
+if query_params.get("role") == "student":
+    default_role = "學生端 (手機畫面)"
+else:
+    default_role = "老師端 (大螢幕/PPT)"
 
-# ==================== 老師端 (大螢幕) ====================
+role = st.sidebar.selectbox("請選擇您的角色", ["老師端 (大螢幕/PPT)", "學生端 (手機畫面)"], index=0 if default_role == "老師端 (大螢幕/PPT)" else 1)
+
+# ==================== 老師端 (大螢幕/PPT) ====================
 if role == "老師端 (大螢幕/PPT)":
     st.title("👨‍🏫 課堂即時互動系統 - 老師控制台")
     
@@ -28,22 +32,14 @@ if role == "老師端 (大螢幕/PPT)":
         
     st.write(f"💡 正確答案是：**{q['correct_answer']}**")
 
-    # 🔥 已經幫您修改為您專屬的 Streamlit 正式網址！
-    current_url = "https://streamlit.app" 
+    # 您的專屬正式網址，並加上參數強制手機進入學生端
+    student_url = "https://streamlit.app" 
     
-    # 安全的 QR Code 產生與轉換流程
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(current_url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    
-    # 將 QR Code 轉換成 Streamlit 可以安全讀取的 BytesIO 格式
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    byte_im = buf.getvalue()
+    # 使用超穩定的線上 API 產生 QR Code 圖片
+    qr_api_url = f"https://qrserver.com{student_url}"
     
     # 顯示 QR Code 供學生掃描
-    st.image(byte_im, caption="請學生掃描 QR Code 進入加入答題", width=250)
+    st.image(qr_api_url, caption="請學生掃描 QR Code 進入加入答題", width=250)
 
     st.divider()
     st.subheader("📊 即時答題統計")
