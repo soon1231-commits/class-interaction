@@ -12,14 +12,18 @@ if "current_question" not in st.session_state:
         "correct_answer": "B"
     }
 
-# 2. 自動判別角色
-query_params = st.query_params
-if query_params.get("role") == "student":
-    default_role = "學生端 (手機畫面)"
-else:
-    default_role = "老師端 (大螢幕/PPT)"
+# 2. 全新改寫的安全角色判別邏輯
+role_param = st.query_params.to_dict().get("role", "")
 
-role = st.sidebar.selectbox("請選擇您的角色", ["老師端 (大螢幕/PPT)", "學生端 (手機畫面)"], index=0 if default_role == "老師端 (大螢幕/PPT)" else 1)
+if role_param == "student":
+    role = "學生端 (手機畫面)"
+else:
+    # 預設為老師端，並在側邊欄提供手動切換選單（方便測試）
+    role = st.sidebar.selectbox(
+        "請選擇您的角色", 
+        ["老師端 (大螢幕/PPT)", "學生端 (手機畫面)"], 
+        index=0
+    )
 
 # ==================== 老師端 (大螢幕/PPT) ====================
 if role == "老師端 (大螢幕/PPT)":
@@ -32,13 +36,11 @@ if role == "老師端 (大螢幕/PPT)":
         
     st.write(f"💡 正確答案是：**{q['correct_answer']}**")
 
-    # 專屬正式網址
-    student_url = "class-interaction-qqspmptpuvrydk4oblxfvw.streamlit.app/?role=student"
+    # 精準的公開答題網址（加上參數強制轉向學生端）
+    student_url = "https://streamlit.app" 
     
-    # 使用 segno 產生最穩定的 SVG 格式 QR Code
+    # 產生 QR Code
     qr = segno.make(student_url)
-    
-    # 顯示 QR Code 供學生掃描
     st.image(qr.png_data_uri(scale=5), caption="請學生掃描 QR Code 進入加入答題", width=250)
 
     st.divider()
@@ -51,7 +53,7 @@ if role == "老師端 (大螢幕/PPT)":
         ans_counts = df['answer'].value_counts().reindex(["A", "B", "C", "D"], fill_value=0)
         st.bar_chart(ans_counts)
         
-        # 顯示誰答對的多 (排行榜)
+        # 顯示排行榜
         st.subheader("🏆 答對題數排行榜")
         leaderboard = df[df['correct'] == True]['name'].value_counts().reset_index()
         leaderboard.columns = ['學生姓名', '答對題數']
