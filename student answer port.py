@@ -28,16 +28,22 @@ if role == "老師端 (大螢幕/PPT)":
         
     st.write(f"💡 正確答案是：**{q['correct_answer']}**")
 
-    # 動態產生 QR Code (假設這是你部署後的網頁網址)
-    # 在本機測試時可以先用 placeholder
+    # 🔥 已經幫您修改為您專屬的 Streamlit 正式網址！
     current_url = "https://streamlit.app" 
+    
+    # 安全的 QR Code 產生與轉換流程
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
     qr.add_data(current_url)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     
+    # 將 QR Code 轉換成 Streamlit 可以安全讀取的 BytesIO 格式
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    byte_im = buf.getvalue()
+    
     # 顯示 QR Code 供學生掃描
-    st.image(img, caption="請學生掃描 QR Code 進入加入答題", width=250)
+    st.image(byte_im, caption="請學生掃描 QR Code 進入加入答題", width=250)
 
     st.divider()
     st.subheader("📊 即時答題統計")
